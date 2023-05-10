@@ -46,7 +46,7 @@ Nmap done: 1 IP address (1 host up) scanned in 38.30 seconds
 used smbclient -N -L \\\\\\\\10.129.42.158\\\\\\
 to find backups share that does not require password.
 
-then i used smbclient -N  \\\\\10.129.42.158\\backups 
+smbclient -N  \\\\\10.129.42.158\\backups 
 to connect backup share
 
 used dir-command to find out there is prod.dtsConfig file and downloaded it with GET prod.dtsConfig that revealed:
