@@ -5,3 +5,10 @@ Added '10.10.11.194 soccer.htb' to my hosts file for website to work
 
 'gobuster dir -u http://soccer.htb -w /usr/share/dirbuster/wordlists/directory-list-2.3-small.txt' found that there is '/tiny' directory which has a login page
 It is a Tiny file manager 2.4.3 which is vulnerable to path traversal
+
+I didn't have upload rights to '/' but I was able to upload to '/uploads'. Uploaded a reverse shell and then went to 'http://soccer.htb/tiny/uploads/php-reverse.php' to execute it
+Checked the python version and upgraded my shell with:
+python3 -c 'import pty; pty.spawn("/bin/bash")'
+CTRL + Z
+stty raw -echo && fg
+
