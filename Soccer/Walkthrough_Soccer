@@ -1,0 +1,3 @@
+Started with 'ping 10.10.11.194 -c 4' to make sure my vpn is up and machine is available
+'nmap -p- -T4 10.10.11.194' to see which ports are open. Ports 22, 80 and 9091 were open so i scanned them again with 'nmap -sVC -p 22,80,9091 10.10.11.194' 
+for better understanding of versions running in the backend.
