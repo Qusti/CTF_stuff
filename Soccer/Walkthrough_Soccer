@@ -28,3 +28,9 @@ I then continued to use sqlmap to find tables from 'soccer_db' which were '4, em
 Sqlmap enumerated contents of the tables which took a while.
 
 Ssh in to the box with credentials from the 'soccer_db'
+
+
+permit nopass player as root cmd /usr/bin/dstat
+/usr/local/bin/doas
+/usr/local/etc/doas.conf
+/snap/snapd/17883/usr/lib/snapd/snap-confine
