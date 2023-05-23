@@ -29,8 +29,13 @@ Sqlmap enumerated contents of the tables which took a while.
 
 Ssh in to the box with credentials from the 'soccer_db'
 
+I uploaded lse.sh from my pc to target and run it to enumerate faster.
+It found 'permit nopass player as root cmd /usr/bin/dstat' in 'doas.conf' which means I can use 'dstat' as root without a password.
+I then created 'dstat_exp.py' to my pc containing:
 
-permit nopass player as root cmd /usr/bin/dstat
-/usr/local/bin/doas
-/usr/local/etc/doas.conf
-/snap/snapd/17883/usr/lib/snapd/snap-confine
+import os
+os.system('chmod +s /usr/bin/bash')
+
+Downloaded it with target machine to one plugin folder I had write to and run 'doas /usr/bin/dstat --exp'
+It gave few errors but used 'bash -p' and gained root!
+Flag was '/root/root.txt'
