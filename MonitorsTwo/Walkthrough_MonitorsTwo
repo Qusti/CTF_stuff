@@ -14,4 +14,16 @@ Line 'mysql --host=db --user=root --password=root cacti -e "show tables"' gives 
 'mysql --host=db --user=root --password=root cacti -e "select username,password from user_auth"' for things that intrest us.
 We get usernames and password hashes that can be probably cracked.
 I also uploaded 'lse.sh' to help with enumeration. It seems that we are in docker container.
+There is setuid binary /bin/bash so using '/bin/bash -p' gives us euid=0(root) it does not really give anything at this point thought.
 
+Cracking the hash started with 'hashid -m "<hash>"' it shows type of the hash for hashcat.
+'hashcat -a 0 -m 3200  '$2y$10$vcrYth5YcCLlZaPDj6PwqOYTw68W1.3WeKlBn70JonsdW/MhFYK4C' /usr/share/wordlists/rockyou.txt' cracks the password with
+rockyou.txt and takes a while.
+I can now use cracked password to shh as marcus to the target.
+
+There is user.txt in '/home/marcus'.
+Uploaded lse.sh again to enumerate target. Didn't find anything interesting other than marcu's mail.
+There seems to be multible vulnerabilites on the machine. 
+CVE-2021-33033, CVE-2020-25706 and CVE-2021-41091. Kerner exploits are mostly unstable, cacti has already been upgraded to 1.2.22 from 1.2.13 
+but last one seems promising. 
+Searching CVE-2021-41091 finds a github script again but exploit seems easy enough to run without the script.
