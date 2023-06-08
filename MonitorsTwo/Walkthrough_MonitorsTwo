@@ -17,8 +17,7 @@ I also uploaded 'lse.sh' to help with enumeration. It seems that we are in docke
 There is suid binary 'capsh' and I use it to gain root with './capsh --gid=0 --uid=0 --' it does not really give anything at this point thought.
 
 Cracking the hash started with 'hashid -m "<hash>"' it shows type of the hash for hashcat.
-'hashcat -a 0 -m 3200  '$2y$10$vcrYth5YcCLlZaPDj6PwqOYTw68W1.3WeKlBn70JonsdW/MhFYK4C' /usr/share/wordlists/rockyou.txt' cracks the password with
-rockyou.txt and takes a while.
+'hashcat -a 0 -m 3200  '<hash>' /usr/share/wordlists/rockyou.txt' tries to crack the password with rockyou.txt.
 I can now use cracked password to shh as marcus to the target.
 
 There is user.txt in '/home/marcus'.
