@@ -14,7 +14,7 @@ Line 'mysql --host=db --user=root --password=root cacti -e "show tables"' gives 
 'mysql --host=db --user=root --password=root cacti -e "select username,password from user_auth"' for things that intrest us.
 We get usernames and password hashes that can be probably cracked.
 I also uploaded 'lse.sh' to help with enumeration. It seems that we are in docker container.
-There is setuid binary /bin/bash so using '/bin/bash -p' gives us euid=0(root) it does not really give anything at this point thought.
+There is suid binary 'capsh' and I use it to gain root with './capsh --gid=0 --uid=0 --' it does not really give anything at this point thought.
 
 Cracking the hash started with 'hashid -m "<hash>"' it shows type of the hash for hashcat.
 'hashcat -a 0 -m 3200  '$2y$10$vcrYth5YcCLlZaPDj6PwqOYTw68W1.3WeKlBn70JonsdW/MhFYK4C' /usr/share/wordlists/rockyou.txt' cracks the password with
