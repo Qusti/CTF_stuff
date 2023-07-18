@@ -7,7 +7,7 @@ Found 'grpcui' from github and I need 'go' to install it. After that is installe
 I registered user and then used 'LoginUser' with created username and password. It gave me the id and token string.
 Tried the same thing with username 'admin' password 'admin' and it worked. With proxy on burb I saved the item to my pc.
 
-With the file I used 'sqlmap -r pc_admin --dbs' to check if there is and vulnerability which there is.
+With the file I used 'sqlmap -r pc_admin --dbs' to check if there is a vulnerability which there is.
 'sqlmap -r pc_admin --tables' finds out possible tables in the database. 
 +----------+
 | accounts |
