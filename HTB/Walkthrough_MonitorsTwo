@@ -1,6 +1,18 @@
 I started with 'ping -c4 10.10.11.211' to make sure I had a connection to the target machine.
 Continued with 'nmap -p- 10.10.11.211' to find all open ports for further scanning.
 Next, I used 'nmap -sVC -p22,80 10.10.11.211' to find out the versions of services and headers to the web server.
+
+PORT   STATE SERVICE VERSION
+22/tcp open  ssh     OpenSSH 8.2p1 Ubuntu 4ubuntu0.5 (Ubuntu Linux; protocol 2.0)
+| ssh-hostkey: 
+|   3072 48:ad:d5:b8:3a:9f:bc:be:f7:e8:20:1e:f6:bf:de:ae (RSA)
+|   256 b7:89:6c:0b:20:ed:49:b2:c1:86:7c:29:92:74:1c:1f (ECDSA)
+|_  256 18:cd:9d:08:a6:21:a8:b8:b6:f7:9f:8d:40:51:54:fb (ED25519)
+80/tcp open  http    nginx 1.18.0 (Ubuntu)
+|_http-server-header: nginx/1.18.0 (Ubuntu)
+|_http-title: Login to Cacti
+Service Info: OS: Linux; CPE: cpe:/o:linux:linux_kernel
+
 There is a login page running on cacti version 1.2.22. Looking at the source code there is a lot of JavaScript variables for some reason. 
 No plain username or passwords thought. 
 Searching 'cacti 1.2.22 exploit' finds a GitHub page that has 'CVE-2022-46169' exploit script for this cacti version.
