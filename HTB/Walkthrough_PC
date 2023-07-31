@@ -1,6 +1,16 @@
 As always, I started with 'ping -c4 10.10.11.214' to make sure I had a connection to the target.
 'nmap -sVC -p- -T4 10.10.11.214' gave a 'host seems down' error so I used the suggested -Pn switch.
 'nmap -sVC -Pn -p- -T4 10.10.11.214 --open -oN nmap_pc' gave better results, port 22 and 50051 seem open.
+
+PORT      STATE SERVICE VERSION
+22/tcp    open  ssh     OpenSSH 8.2p1 Ubuntu 4ubuntu0.7 (Ubuntu Linux; protocol 2.0)
+| ssh-hostkey: 
+|   3072 91:bf:44:ed:ea:1e:32:24:30:1f:53:2c:ea:71:e5:ef (RSA)
+|   256 84:86:a6:e2:04:ab:df:f7:1d:45:6c:cf:39:58:09:de (ECDSA)
+|_  256 1a:a8:95:72:51:5e:8e:3c:f1:80:f5:42:fd:0a:28:1c (ED25519)
+50051/tcp open  unknown
+-----SNIP-----
+
 Searching for port 50051 on google indicates there might be 'gRPC' running
 Found 'grpcui' from github and I need 'go' to install it. After that I installed grpcui according to the readme.
 './grpcui -plaintext 10.10.11.214:50051' opens up the web ui page to the browser. I opened the same page on burp though.
