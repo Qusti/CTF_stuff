@@ -1,9 +1,5 @@
 I started with scanning target with nmap.
 
-# Nmap 7.93 scan initiated Mon Mar 13 12:09:55 2023 as: nmap -sVC -oN nmap_scan_results 10.129.240.158
-Nmap scan report for 10.129.240.158
-Host is up (0.16s latency).
-Not shown: 998 closed tcp ports (conn-refused)
 PORT   STATE SERVICE VERSION
 22/tcp open  ssh     OpenSSH 7.6p1 Ubuntu 4ubuntu0.3 (Ubuntu Linux; protocol 2.0)
 | ssh-hostkey: 
@@ -14,13 +10,6 @@ PORT   STATE SERVICE VERSION
 |_http-server-header: Apache/2.4.29 (Ubuntu)
 |_http-title: Welcome
 Service Info: OS: Linux; CPE: cpe:/o:linux:linux_kernel
-
-Service detection performed. Please report any incorrect results at https://nmap.org/submit/ .
-# Nmap done at Mon Mar 13 12:10:32 2023 -- 1 IP address (1 host up) scanned in 36.98 seconds
-
-
-
-
 
 
 Target has a http server so I used dirbuster to figure out directories in the server.
