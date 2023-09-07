@@ -134,11 +134,14 @@ I will create a rev.php.png file with php reverse shell inside and upload it wit
 The site says "File uploaded successfully! Maybe look in source code to see the path" so again I looked at the source code and found that the file went to "/upload_thm_1001".
 I start a listener port the port in the reverse shell and execute our reverse shell by just clicking the file and we got our shell!
 
+I looked at the folder I landed in but there was nothing. Checked home folders of "ubuntu" and "zeamkish". In zeamkish folder was a file named "ssh_creds.txt"!
+Lets try them for ssh "ssh zeamkish@10.10.116.111" and we are in as zeamkish.
 
-Upgraded the shell with:
-python3 -c 'import pty; pty.spawn("/bin/bash")'
-CTRL + Z
-stty raw -echo && fg
+I upleaded "linpeas.sh" to help with enumeration. There is two uncommon binaries with suid bits.
+-rwsr-x--- 1 root zeamkish 313K Feb 18  2020 /usr/bin/find
+-rwsr-xr-x 1 root root 313K Apr 10  2020 /usr/bin/nano
 
-
-
+As nano has suid bit enabled we can try to edit "/etc/passwd".
+Lets copy everything from root users line and add it to the bottom of the file with name "newroot".
+The create passwd hash with openssl "openssl passwd -salt test password". Lets add the hash to very start if the line and replace the "x". Then save the file. 
+"su newroot" should give us root access when we put your password that we used for the hash.
