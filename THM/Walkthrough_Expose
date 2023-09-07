@@ -123,11 +123,22 @@ This grants login to "/admin_101" but there is nothing.
 | 1  | /file1010111/index.php       | 69c66901194a6486176e81f5945b8929                    |
 | 3  | /upload-cv00101011/index.php | // ONLY ACCESSIBLE THROUGH USERNAME STARTING WITH Z |
 +----+------------------------------+-----------------------------------------------------+
-I tried to crack hash with john but it didn't work. I used crackstation.com to see if it would work, and it did. Password is "easytohack".
+I tried to crack hash with JohnTheRipper but it didn't work. I used crackstation.com to see if it would work, and it did. The password is "easytohack".
+Tried to brute force "http://10.10.116.111:1337/upload-cv00101011/index.php" with z starting usernames as it hints that the username starts with "z" but it didn't work.
+"/file1010111/index.php" lets me in with the password "easytohack". Looking at the source code there is a "Hint: Try file or view as GET parameters?". 
+It hints towards LFI(local file inclusion). Trying "http://10.10.116.111:1337/file1010111/index.php?file=../../../../../../../../../etc/passwd" spits out the whole passwd file!
+
+In the file is user "zeamkish", trying that on "http://10.10.116.111:1337/upload-cv00101011/index.php" gives upload page. 
+The source code tells me that there is a javascript function that only allows "jpg & png" files. Let's try to bypass it with burp.
+I will create a rev.php.png file with php reverse shell inside and upload it with burp. I intercept the upload and remove ".png" extension from the reverse shell and it goes through!
+The site says "File uploaded successfully! Maybe look in source code to see the path" so again I looked at the source code and found that the file went to "/upload_thm_1001".
+I start a listener port the port in the reverse shell and execute our reverse shell by just clicking the file and we got our shell!
 
 
+Upgraded the shell with:
+python3 -c 'import pty; pty.spawn("/bin/bash")'
+CTRL + Z
+stty raw -echo && fg
 
 
-I fuzzed further "/phpmyadmin" portal with "ffuf -w /usr/share/wordlists/seclists/Discovery/Web-Content/directory-list-2.3-small.txt -u http://10.10.116.111:1337/phpmyadmin/FUZZ -fs 14773" 
-and there are more directories "templates, themes, doc, js, libraries, sql, locale".
 
