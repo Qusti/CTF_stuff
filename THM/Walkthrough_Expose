@@ -1,0 +1,99 @@
+To check my VPN connection was working I started with "ping -c4 10.10.171.196", everything seems to be working fine so let's start.
+I ran "sudo nmap -sS -p- 10.10.171.196" to get an initial understanding of what ports were open on the target.
+
+{
+Starting Nmap 7.94 ( https://nmap.org ) at 2023-09-07 15:51 EEST
+Nmap scan report for 10.10.171.196
+Host is up (0.075s latency).
+Not shown: 65530 closed tcp ports (reset)
+PORT     STATE SERVICE
+21/tcp   open  ftp
+22/tcp   open  ssh
+53/tcp   open  domain
+1337/tcp open  waste
+1883/tcp open  mqtt
+
+Nmap done: 1 IP address (1 host up) scanned in 39.58 seconds
+}
+
+
+Refined my command a bit, "nmap -sVC -p21,22,53,1337,1883 10.10.171.196" to find versions of the services running.
+
+PORT     STATE SERVICE                 VERSION
+21/tcp   open  ftp                     vsftpd 2.0.8 or later
+| ftp-syst:
+|   STAT:
+| FTP server status:
+|      Connected to ::ffff:10.14.51.51
+|      Logged in as ftp
+|      TYPE: ASCII
+|      No session bandwidth limit
+|      Session timeout in seconds is 300
+|      Control connection is plain text
+|      Data connections will be plain text
+|      At session startup, client count was 1
+|      vsFTPd 3.0.3 - secure, fast, stable
+|_End of status
+|_ftp-anon: Anonymous FTP login allowed (FTP code 230)
+22/tcp   open  ssh                     OpenSSH 8.2p1 Ubuntu 4ubuntu0.7 (Ubuntu Linux; protocol 2.0)
+| ssh-hostkey:
+|   3072 a5:d1:b7:3c:c5:03:aa:34:f1:a6:e3:5f:b7:cd:5b:46 (RSA)
+|   256 14:da:96:fc:70:45:71:e7:39:c8:0f:c3:a9:7a:87:b2 (ECDSA)
+|_  256 e2:90:b5:0b:ee:f1:a1:9a:77:e1:40:cc:65:ae:66:12 (ED25519)
+53/tcp   open  domain                  ISC BIND 9.16.1 (Ubuntu Linux)
+| dns-nsid:
+|_  bind.version: 9.16.1-Ubuntu
+1337/tcp open  http                    Apache httpd 2.4.41 ((Ubuntu))
+|_http-title: EXPOSED
+|_http-server-header: Apache/2.4.41 (Ubuntu)
+1883/tcp open  mosquitto version 1.6.9
+| mqtt-subscribe:
+|   Topics and their most recent payloads:
+|     $SYS/broker/load/connections/1min: 1.83
+|     $SYS/broker/messages/sent: 13
+|     $SYS/broker/heap/current: 50872
+|     $SYS/broker/load/publish/sent/1min: 9.14
+|     $SYS/broker/publish/bytes/sent: 55
+|     $SYS/broker/load/messages/sent/5min: 2.55
+|     $SYS/broker/load/sockets/5min: 0.74
+|     $SYS/broker/clients/active: 1
+|     $SYS/broker/load/bytes/sent/1min: 340.81
+|     $SYS/broker/uptime: 682 seconds
+|     $SYS/broker/load/bytes/received/15min: 4.57
+|     $SYS/broker/clients/maximum: 1
+|     $SYS/broker/load/publish/sent/5min: 1.96
+|     $SYS/broker/load/bytes/sent/5min: 73.25
+|     $SYS/broker/load/messages/received/15min: 0.20
+|     $SYS/broker/load/connections/15min: 0.13
+|     $SYS/broker/load/bytes/received/5min: 13.55
+|     $SYS/broker/store/messages/bytes: 140
+|     $SYS/broker/bytes/received: 69
+|     $SYS/broker/subscriptions/count: 2
+|     $SYS/broker/version: mosquitto version 1.6.9
+|     $SYS/broker/store/messages/count: 30
+|     $SYS/broker/load/connections/5min: 0.39
+|     $SYS/broker/publish/messages/sent: 10
+|     $SYS/broker/clients/inactive: 0
+|     $SYS/broker/load/bytes/received/1min: 63.04
+|     $SYS/broker/load/messages/sent/15min: 0.86
+|     $SYS/broker/clients/disconnected: 0
+|     $SYS/broker/clients/connected: 1
+|     $SYS/broker/load/sockets/1min: 2.51
+|     $SYS/broker/load/messages/received/1min: 2.74
+|     $SYS/broker/load/sockets/15min: 0.30
+|     $SYS/broker/messages/stored: 30
+|     $SYS/broker/retained messages/count: 34
+|     $SYS/broker/heap/maximum: 51272
+|     $SYS/broker/load/publish/sent/15min: 0.66
+|     $SYS/broker/clients/total: 1
+|     $SYS/broker/bytes/sent: 373
+|     $SYS/broker/load/messages/received/5min: 0.59
+|     $SYS/broker/load/bytes/sent/15min: 24.72
+|     $SYS/broker/load/messages/sent/1min: 11.88
+|_    $SYS/broker/messages/received: 3
+Service Info: OS: Linux; CPE: cpe:/o:linux:linux_kernel
+
+Service detection performed. Please report any incorrect results at https://nmap.org/submit/ .
+Nmap done: 1 IP address (1 host up) scanned in 24.93 seconds
+
+
