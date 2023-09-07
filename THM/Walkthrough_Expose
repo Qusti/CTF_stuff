@@ -1,9 +1,9 @@
-To check my VPN connection was working I started with "ping -c4 10.10.171.196", everything seems to be working fine so let's start.
-I ran "sudo nmap -sS -p- 10.10.171.196" to get an initial understanding of what ports were open on the target.
+To check my VPN connection was working I started with "ping -c4 10.10.116.11", everything seems to be working fine so let's start.
+I ran "sudo nmap -sS -p- 10.10.116.111" to get an initial understanding of what ports were open on the target.
 
 {
 Starting Nmap 7.94 ( https://nmap.org ) at 2023-09-07 15:51 EEST
-Nmap scan report for 10.10.171.196
+Nmap scan report for 10.10.116.111
 Host is up (0.075s latency).
 Not shown: 65530 closed tcp ports (reset)
 PORT     STATE SERVICE
@@ -17,14 +17,14 @@ Nmap done: 1 IP address (1 host up) scanned in 39.58 seconds
 }
 
 
-Refined my command a bit, "nmap -sVC -p21,22,53,1337,1883 10.10.171.196" to find versions of the services running.
+Refined my command a bit, "nmap -sVC -p21,22,53,1337,1883 10.10.116.111" to find versions of the services running.
 {
 PORT     STATE SERVICE                 VERSION
 21/tcp   open  ftp                     vsftpd 2.0.8 or later
 | ftp-syst:
 |   STAT:
 | FTP server status:
-|      Connected to ::ffff:10.14.51.51
+|      Connected to ::ffff:10.10.10.10
 |      Logged in as ftp
 |      TYPE: ASCII
 |      No session bandwidth limit
@@ -99,4 +99,6 @@ Nmap done: 1 IP address (1 host up) scanned in 24.93 seconds
 
 So there is FTP, SSH, DNS domain, waste p2p encrypted file sharing software, and MQTT which is a home automation protocol running.
 FTP server allows anonymous login without a password so let's start there. There are no files but the welcome message is "220 Welcome to the Expose Web Challenge.".
-
+Went to "http://10.10.116.111:1337" with the browser and got a plank page with "EXPOSED" in it. Lets use ffuf to try to find so directories.
+"ffuf -w /usr/share/wordlists/seclists/Discovery/Web-Content/directory-list-2.3-small.txt -u http://10.10.116.111:1337/FUZZ" found /admin, /javascript & /phpmyadmin.
+/admin and /phpmyadmin both have login pages
