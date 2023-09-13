@@ -137,11 +137,8 @@ I start a listener port the port in the reverse shell and execute our reverse sh
 I looked at the folder I landed in but there was nothing. Checked home folders of "ubuntu" and "zeamkish". In zeamkish folder was a file named "ssh_creds.txt"!
 Lets try them for ssh "ssh zeamkish@10.10.116.111" and we are in as zeamkish.
 
-I upleaded "linpeas.sh" to help with enumeration. There is two uncommon binaries with suid bits.
+I upleaded "linpeas.sh" to help with enumeration. There is a uncommon binary with suid bit.
 -rwsr-x--- 1 root zeamkish 313K Feb 18  2020 /usr/bin/find
--rwsr-xr-x 1 root root 313K Apr 10  2020 /usr/bin/nano
 
-As nano has suid bit enabled we can try to edit "/etc/passwd" because with suid bit we have permission as the binary owner which is root.
-Lets copy everything from root users line and add it to the bottom of the file with name "newroot".
-The create passwd hash with openssl "openssl passwd -salt test password". Lets add the hash to very start if the line and replace the "x". Then save the file. 
-"su newroot" should give us root access when we put your password that we used for the hash.
+I had a look at gtfobins and found that you can spawn a privileged shell with: "./find . -exec /bin/sh -p \; -quit"
+The flag was "/root/flag.txt"
