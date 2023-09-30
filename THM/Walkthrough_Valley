@@ -60,7 +60,7 @@ dev notes from valleyDev:
 -----
 
 The directory found is a login page. I had ZAP running in the background to catalog everything I went to and the login page loaded "dev.js" which has a function that compares cleartext credentials.
-If you log in with the credentials that the function uses for comparison it opens the "/dev1243224123123/devNotes37370.txt" file with the following:
+If you log in with the credentials that the function uses for comparison it opens the "/devNotes37370.txt" file with the following:
 -----
 dev notes for ftp server:
 -stop reusing credentials
@@ -68,6 +68,12 @@ dev notes for ftp server:
 -stay up to date on patching
 -change ftp port to normal port
 -----
+
+As the notes hint, let's try if the plaintext credentials work for the FTP server!
+"ftp 10.10.226.228 37370" with the credentials gets us in and there are three .pcapng files.
+
+
+
 
 
 
