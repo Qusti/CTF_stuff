@@ -75,7 +75,8 @@ Downloaded them to my Kali and inspected them with Wireshark.
 I spent a while for looking anything interesting in the TCP stream but actually interesting information was in HTTP requests.
 There was one post request in the last file for a login page and as the protocol was not encrypted the credentials were in plaintext.
 I used the credentials to try to log in to the box with SSH and it worked!
-
+There was "user.txt" in the valley user's home folder.
+I once again spent way too long looking for ways to escalate privileges and then just tried to "su siemDev" with a password from "dev.js" and it worked.
 
 
 
