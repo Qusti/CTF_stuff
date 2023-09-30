@@ -73,8 +73,8 @@ As the notes hint, let's try if the plaintext credentials work for the FTP serve
 "ftp 10.10.226.228 37370" with the credentials gets us in and there are three .pcapng files.
 Downloaded them to my Kali and inspected them with Wireshark.
 I spent a while for looking anything interesting in the TCP stream but actually interesting information was in HTTP requests.
-There was one post request in the last file for a login page and as protocol was not encrypted the credentials were in plaintext.
-
+There was one post request in the last file for a login page and as the protocol was not encrypted the credentials were in plaintext.
+I used the credentials to try to log in to the box with SSH and it worked!
 
 
 
