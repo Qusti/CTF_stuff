@@ -85,6 +85,8 @@ My eye caught a few lines above that looked like hexadecimal strings. Used crack
 I combined two lines and it's a match! I tried the newly found password for the "valley" user and it worked.
 
 Earlier trying to figure out privilege escalation I found a Python script that runs every minute with root privileges from "/etc/crontab".
-
-
-
+Again I tried for a while to find a way to get the script to execute a command by editing the image files but to no avail.
+What I should have done is check for what access "valleyAdmin" group has that "valley" user was in. 
+"/photos/script/photosEncrypt.py" script imports "base64" from "/usr/lib/python3.8" and I have write access to it as "valleyAdmin" group member. 
+So I added the line "os.system("chmod u+s /bin/bash")" and as it runs as a root it edited the "bash" binary so I could spawn a privileged shell.
+There was a "root.txt" in "/root" folder.
