@@ -1,4 +1,4 @@
-To check my VPN connection was working I started with "ping -c4 10.10.116.11", Everything seems to be working fine so let's start.
+To check my VPN connection was working I started with "ping -c4 10.10.116.11". Everything seems to be working fine so let's start.
 I ran "sudo nmap -sS -p- 10.10.116.111" to get an initial understanding of what ports were open on the target.
 
 {
