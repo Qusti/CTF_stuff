@@ -262,7 +262,7 @@ I then tried to curl for "/home/dale/.ssh/id_rsa" but sadly it returned nothing 
 I wanted to automate querying of the files so I used ffuf to do that.
 ffuf -w /usr/share/seclists/Fuzzing/LFI/LFI-gracefulsecurity-linux.txt -t 80 -u http://dev.team.thm/script.php?page=../../../../../../../../..FUZZ -fs 1
 Returns a number of files and after looking at a few of them I checked the "/etc/ssh/sshd_config" which at the bottom contained the dale user id_rsa file.
-I copied it to a file and removed all the "#"s before the key.
+I copied it to a file and removed all the "#"s before the key. I also used "chmod 600 id_rsa_dale" to modify the permissions of the file so I wouldn't the an error.
 
 
 
