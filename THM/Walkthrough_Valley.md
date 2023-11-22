@@ -48,7 +48,10 @@ Nmap done: 1 IP address (1 host up) scanned in 11.37 seconds
 So there is SSH, Apache HTTP server, and FTP server with open ports.
 Let's check the webserver first as we do not have credentials for SSH or FTP.
 The website seems to be for a photography company and there are pricing and gallery pages.
-I used ffuf to find more directories "ffuf -w /usr/share/wordlists/seclists/Discovery/Web-Content/directory-list-2.3-small.txt -u http://10.10.226.228/FUZZ -ic -t 70"
+I used ffuf to find more directories 
+````
+ffuf -w /usr/share/wordlists/seclists/Discovery/Web-Content/directory-list-2.3-small.txt -u http://10.10.226.228/FUZZ -ic -t 70
+````
 Directories found were "gallery, static, pricing". I then used to find more directories with ffuf.
 From the "static" directory ffuf found 18 photos and 1 extra with the name "00" which was a much smaller file than the photos.
 ````
