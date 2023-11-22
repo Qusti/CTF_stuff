@@ -49,7 +49,11 @@ Nmap done: 1 IP address (1 host up) scanned in 11.85 seconds
 
 The FTP server does not have Anonymous login enabled so I can't use that to enumerate files in there.
 As I don't have any username for FTP or SSH I'm not going to bruteforce them as it's most probably just a waste of time.
-I also used "nmap -sVC --script vuln,default,safe,version -p21,22,80 10.10.28.97" to further enumerate the target.
+I also used 
+````
+nmap -sVC --script vuln,default,safe,version -p21,22,80 10.10.28.97
+````
+to further enumerate the target.
 I'm not going to copy it here as it's very long but at the bottom, it reads: "|_http-title: Apache2 Ubuntu Default Page: It works! If you see this add 'te..."
 Let's use curl to see what was snipped out of the line.
 ````
@@ -260,7 +264,9 @@ case $- in
 
 I then tried to curl for "/home/dale/.ssh/id_rsa" but sadly it returned nothing so the file does not exist.
 I wanted to automate querying of the files so I used ffuf to do that.
+````
 ffuf -w /usr/share/seclists/Fuzzing/LFI/LFI-gracefulsecurity-linux.txt -t 80 -u http://dev.team.thm/script.php?page=../../../../../../../../..FUZZ -fs 1
+````
 Returns a number of files and after looking at a few of them I checked the "/etc/ssh/sshd_config" which at the bottom contained the dale user id_rsa file.
 I copied it to a file and removed all the "#"s before the key. I used "chmod 600 id_rsa_dale" to modify the permissions of the file so I wouldn't the an error about unprotected private key file.
 Now I should be able to log in using "ssh -i id_rsa_dale dale@10.10.10.28.97".
@@ -314,7 +320,10 @@ uid=1001(gyles) gid=1001(gyles) groups=1001(gyles),1003(editors),1004(admin)
 ````
 
 Using "sudo -l" requires a password, which I don't have but the user is part of the "admin" group.
-"find / -group admin -type f 2>/dev/null" searches if group "admin" has any files that belong to the group.
+````
+find / -group admin -type f 2>/dev/null
+````
+Searches if group "admin" has any files that belong to the group.
 There is one  "/usr/local/bin/main_backup.sh"
 ````
 cat /usr/local/bin/main_backup.sh
