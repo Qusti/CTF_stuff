@@ -1,9 +1,5 @@
 To check my VPN connection was working I started with `ping -c4 10.10.116.11`. Everything seems to be working fine so let's start.
-I ran 
-````
-sudo nmap -sS -p- 10.10.116.111
-````
-to get an initial understanding of what ports were open on the target.
+I ran `sudo nmap -sS -p- 10.10.116.111` to get an initial understanding of what ports were open on the target.
 
 ````
 Starting Nmap 7.94 ( https://nmap.org ) at 2023-09-07 15:51 EEST
@@ -105,9 +101,7 @@ Nmap done: 1 IP address (1 host up) scanned in 24.93 seconds
 So there is FTP, SSH, DNS domain, waste p2p encrypted file sharing software, and MQTT which is a home automation protocol running.
 FTP server allows anonymous login without a password so let's start there. There are no files but the welcome message is `220 Welcome to the Expose Web Challenge.`.
 Went to `http://10.10.116.111:1337` with the browser and got a plank page with "EXPOSED" in it. Let's use ffuf to try to find some directories.
-````
-ffuf -w /usr/share/wordlists/dirb/big.txt -u http://10.10.116.111:1337/FUZZ
-````
+`ffuf -w /usr/share/wordlists/dirb/big.txt -u http://10.10.116.111:1337/FUZZ`
 found "/admin, /admin_101, /javascript, /phpmyadmin & /server-status".
 
 "/admin, /admin_101 & /phpmyadmin" all have login pages but "/admin" states "Is this the right admin portal?". Testing "/admin" login does not really do anything so let's look at the "/admin_101" next.
