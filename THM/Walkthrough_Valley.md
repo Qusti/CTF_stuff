@@ -73,26 +73,27 @@ dev notes for ftp server:
 ````
 
 As the notes hint, let's try if the plaintext credentials work for the FTP server!
-"ftp 10.10.226.228 37370" with the credentials gets us in and there are three .pcapng files.
+`ftp 10.10.226.228 37370` with the credentials gets us in and there are three .pcapng files.
 Downloaded them to my Kali and inspected them with Wireshark.
-I spent a while for looking anything interesting in the TCP stream but actually interesting information was in HTTP requests.
+I spent a while for looking anything interesting in the TCP stream but interesting information was in HTTP requests.
 There was one post request in the last file for a login page and as the protocol was not encrypted, the credentials were in plaintext.
 I used the credentials to try to log in to the box with SSH and it worked!
-There was "user.txt" in the valley user's home folder.
+There was `user.txt` in the valley user's home folder.
+
 I once again spent way too long looking for ways to escalate privileges and then just tried to "su siemDev" with a password from "dev.js" and it worked.
-So now I have access to "valleyDev" and "siemDev" accounts.
-So there was a "valleyAuthenticator" elf binary in "/home" folder so I investigated it.
-There probably is a better way to figure out what is going on in the binary but I transferred it to Kali and used "strings valleyAuthenticator".
+So now I have access to `valleyDev` and `siemDev` accounts.
+So there was a `valleyAuthenticator` elf binary in "/home" folder so I investigated it.
+There probably is a better way to figure out what is going on in the binary but I transferred it to Kali and used strings valleyAuthenticator``.
 I got a long list of strings which I grepped for "user" and "pass*" and found some cleartext username of sorts and a password gibberish.
 My eye caught a few lines above that looked like hexadecimal strings. Used crackstation.net to see if I was correct and it gave a partial match for one of the lines.
 I combined two lines and it's a match! I tried the newly found password for the "valley" user and it worked.
 
 Earlier trying to figure out privilege escalation I found a Python script that runs every minute with root privileges from "/etc/crontab".
 Again I tried for a while to find a way to get the script to execute a command by editing the image files but to no avail.
-What I should have done is check for what access "valleyAdmin" group has that "valley" user was in. 
-"/photos/script/photosEncrypt.py" script imports "base64" from "/usr/lib/python3.8" and I have write access to it as "valleyAdmin" group member. 
-So I added the line "os.system("chmod u+s /bin/bash")" and as it runs as a root it edited the "bash" binary so I could spawn a privileged shell.
-There was a "root.txt" in "/root" folder.
+What I should have done is check for what access `valleyAdmin` group that `valley` user was in. 
+`/photos/script/photosEncrypt.py` script imports "base64" from "/usr/lib/python3.8" and I have write access to it as `valleyAdmin` group member. 
+So I added the line `os.system("chmod u+s /bin/bash")` and as it runs as a root it edited the "bash" binary so I could spawn a privileged shell.
+There was a `root.txt` in `/root` folder.
 
 I also spent some extra time to get a reverse shell one-liner working! Here it is: 
 ````
