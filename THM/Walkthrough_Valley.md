@@ -83,7 +83,7 @@ There was `user.txt` in the valley user's home folder.
 I once again spent way too long looking for ways to escalate privileges and then just tried to "su siemDev" with a password from "dev.js" and it worked.
 So now I have access to `valleyDev` and `siemDev` accounts.
 So there was a `valleyAuthenticator` elf binary in "/home" folder so I investigated it.
-There probably is a better way to figure out what is going on in the binary but I transferred it to Kali and used strings valleyAuthenticator``.
+There probably is a better way to figure out what is going on in the binary but I transferred it to Kali and used `strings valleyAuthenticator`.
 I got a long list of strings which I grepped for "user" and "pass*" and found some cleartext username of sorts and a password gibberish.
 My eye caught a few lines above that looked like hexadecimal strings. Used crackstation.net to see if I was correct and it gave a partial match for one of the lines.
 I combined two lines and it's a match! I tried the newly found password for the "valley" user and it worked.
